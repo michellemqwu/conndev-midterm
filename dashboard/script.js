@@ -63,7 +63,6 @@ function onMessage(topic, payload, packet) {
     content = '<h2>' + 'Bookmark is currently resting on fsr reading: '+ fsr + '</h2>';
     content += '<p>' + 'last time it was moved was at ' + prevTimestamp + ' with fsr reading at '+ prevFsr + '</p>';
   } else {
-    console.log(stable);
     content = '<h2>' + 'Bookmark is being moved at '+ timestamp + '</h2>';
     content += '<p>' + 'fsr reading is ' + fsr + '</p>';
     prevTimestamp = timestamp;

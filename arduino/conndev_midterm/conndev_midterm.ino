@@ -24,7 +24,7 @@ int fsrThreshold = 50;
 int timeZone = -5;
 
 int sameReading = 0;
-int readingThreshold = 20;
+int readingThreshold = 50;
 
 int wifiLEDPin = 2;
 int mqttLEDPin = 3;
@@ -99,27 +99,40 @@ void loop() {
       sameReading++;
       if (sameReading == readingThreshold) {
         Serial.println("stable!");
-        jsonMessage.replace("STABLE", String(1));
+        String timestamp = String(rtc.getEpoch());
+        jsonMessage.replace("STABLE", "1");
+        jsonMessage.replace("TIMESTAMP", timestamp);
+        jsonMessage.replace("FSR", String(sensorReading));
+        jsonMessage.replace("ACCEX", String(x));
+        jsonMessage.replace("ACCEY", String(y));
+        jsonMessage.replace("ACCEZ", String(z));
+        Serial.print(jsonMessage);
+        if (mqttClient.connected()) {
+          mqttClient.beginMessage(topic);
+          mqttClient.print(jsonMessage);
+          mqttClient.endMessage();
+          Serial.print("published a message: ");
+        }
         sameReading = 0;
       }
     } else {
       sameReading = 0;
-      jsonMessage.replace("STABLE", String(0));
-    }
-    Serial.println("send message!");
-    String timestamp = getTimeString(rtc.getHours(), rtc.getMinutes(), rtc.getSeconds());
-    timestamp = timestamp + " " + String(rtc.getMonth()) + "/" + String(rtc.getDay()) + "/" + String(rtc.getYear());
-    jsonMessage.replace("TIMESTAMP", timestamp);
-    jsonMessage.replace("FSR", String(sensorReading));
-    jsonMessage.replace("ACCEX", String(x));
-    jsonMessage.replace("ACCEY", String(y));
-    jsonMessage.replace("ACCEZ", String(z));
-    Serial.print(jsonMessage);
-    if (mqttClient.connected()) {
-      mqttClient.beginMessage(topic);
-      mqttClient.print(jsonMessage);
-      mqttClient.endMessage();
-      Serial.print("published a message: ");
+      //String timestamp = getTimeString(rtc.getHours(), rtc.getMinutes(), rtc.getSeconds());
+      //timestamp = timestamp + " " + String(rtc.getMonth()) + "/" + String(rtc.getDay()) + "/" + String(rtc.getYear());
+      String timestamp = String(rtc.getEpoch());
+      jsonMessage.replace("TIMESTAMP", timestamp);
+      jsonMessage.replace("STABLE", "0");
+      jsonMessage.replace("FSR", String(sensorReading));
+      jsonMessage.replace("ACCEX", String(x));
+      jsonMessage.replace("ACCEY", String(y));
+      jsonMessage.replace("ACCEZ", String(z));
+      Serial.print(jsonMessage);
+      if (mqttClient.connected()) {
+        mqttClient.beginMessage(topic);
+        mqttClient.print(jsonMessage);
+        mqttClient.endMessage();
+        Serial.print("published a message: ");
+      }
     }
 
     prevX = x;
@@ -211,7 +224,6 @@ bool daylightSavings(int dow) {
 }
 
 String getTimeString(int h, int m, int s) {
-  h = h - 20;
   String now = "";
   if (h < 0) now += "0";
   now += h;
