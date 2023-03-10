@@ -19,12 +19,12 @@ int prevSensorReading;
 float acceXThreshold = 0.03;
 float acceYThreshold = 0.03;
 float acceZThreshold = 0.03;
-int fsrThreshold = 50;
+int fsrThreshold = 60;
 
 int timeZone = -5;
 
 int sameReading = 0;
-int readingThreshold = 50;
+int readingThreshold = 200;
 
 int wifiLEDPin = 2;
 int mqttLEDPin = 3;
